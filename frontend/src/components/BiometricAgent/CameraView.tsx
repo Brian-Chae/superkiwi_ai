@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 
 interface CameraViewProps {
   onVideoReady?: (video: HTMLVideoElement) => void;
@@ -8,14 +8,22 @@ interface CameraViewProps {
   facingMode?: 'user' | 'environment';
 }
 
-export const CameraView: React.FC<CameraViewProps> = ({
+export interface CameraViewHandle {
+  getVideo: () => HTMLVideoElement | null;
+}
+
+export const CameraView = forwardRef<CameraViewHandle, CameraViewProps>(({
   onVideoReady,
   onError,
   width = 640,
   height = 480,
   facingMode = 'user',
-}) => {
+}, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    getVideo: () => videoRef.current,
+  }));
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,9 +40,18 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setIsLoading(false);
-          onVideoReady?.(videoRef.current);
+          videoRef.current.onloadedmetadata = async () => {
+            try {
+              await videoRef.current?.play();
+              setIsLoading(false);
+              if (videoRef.current) {
+                onVideoReady?.(videoRef.current);
+              }
+            } catch (playError) {
+              console.error('Video play error:', playError);
+              setIsLoading(false);
+            }
+          };
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : '카메라 접근 실패';
@@ -75,9 +92,9 @@ export const CameraView: React.FC<CameraViewProps> = ({
         playsInline
         muted
         className="w-full h-full object-cover"
-        style={{ display: isLoading ? 'none' : 'block' }}
+        style={{ display: isLoading ? 'none' : 'block', transform: 'scaleX(-1)' }}
       />
     </div>
   );
-};
+});
 

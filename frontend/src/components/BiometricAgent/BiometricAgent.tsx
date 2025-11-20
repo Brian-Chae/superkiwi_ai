@@ -41,6 +41,9 @@ export const BiometricAgent: React.FC<BiometricAgentProps> = ({
   const focusScoreCalculator = useRef(new FocusScoreCalculator());
   const lastBlinkTime = useRef<number>(0);
   const lastEAR = useRef<number>(1.0);
+  const baselineEAR = useRef<number>(0); // 개인별 기준 EAR
+  const earHistory = useRef<number[]>([]); // EAR 히스토리 (기준값 계산용)
+  const isBlinking = useRef<boolean>(false); // 현재 깜빡임 상태
 
   const handleVideoReady = useCallback((video: HTMLVideoElement) => {
     videoRef.current = video;
@@ -54,6 +57,17 @@ export const BiometricAgent: React.FC<BiometricAgentProps> = ({
       if (!videoRef.current) return;
 
       const video = videoRef.current;
+      
+      // 비디오가 준비되었는지 확인
+      if (
+        video.readyState < 2 || // HAVE_CURRENT_DATA
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+      ) {
+        animationFrameRef.current = requestAnimationFrame(processFrame);
+        return;
+      }
+
       const timestamp = performance.now();
 
       try {
@@ -70,14 +84,34 @@ export const BiometricAgent: React.FC<BiometricAgentProps> = ({
           const rightEAR = calculateEAR(rightEye);
           const avgEAR = (leftEAR + rightEAR) / 2;
 
-          // 깜빡임 감지 (EAR가 임계값 아래로 떨어졌다가 올라오면 깜빡임)
-          if (avgEAR < 0.21 && lastEAR.current >= 0.21) {
+          // 기준 EAR 계산 (최근 30개 프레임의 평균)
+          earHistory.current.push(avgEAR);
+          if (earHistory.current.length > 30) {
+            earHistory.current.shift();
+          }
+          if (earHistory.current.length >= 10) {
+            baselineEAR.current = earHistory.current.reduce((a, b) => a + b, 0) / earHistory.current.length;
+          }
+          
+          // 깜빡임 감지: 개인별 기준 EAR의 70% 아래로 떨어졌다가 다시 올라오면 깜빡임
+          const blinkThreshold = baselineEAR.current > 0 ? baselineEAR.current * 0.7 : 0.21;
+          const openThreshold = baselineEAR.current > 0 ? baselineEAR.current * 0.85 : 0.25;
+          
+          // 깜빡임 시작: EAR가 임계값 아래로 떨어짐
+          if (avgEAR < blinkThreshold && !isBlinking.current) {
+            isBlinking.current = true;
+          }
+          
+          // 깜빡임 종료: EAR가 다시 임계값 위로 올라옴
+          if (isBlinking.current && avgEAR >= openThreshold) {
+            isBlinking.current = false;
             const now = Date.now();
             if (now - lastBlinkTime.current > 200) { // 최소 200ms 간격
               blinkRateCalculator.current.addBlink(now);
               lastBlinkTime.current = now;
             }
           }
+
           lastEAR.current = avgEAR;
 
           // 시선 안정성 계산
@@ -106,11 +140,15 @@ export const BiometricAgent: React.FC<BiometricAgentProps> = ({
           setCurrentData(data);
           onDataUpdate?.(data);
         } else {
+          // 얼굴이 감지되지 않으면 상태 초기화
+          isBlinking.current = false;
+          lastEAR.current = 1.0;
+          
           // 얼굴이 감지되지 않으면 Focus Score는 0
           const data: BiometricData = {
             faceDetected: false,
             gazeStability: 0,
-            blinkRate: 0,
+            blinkRate: blinkRateCalculator.current.getBlinkRate(), // 기존 깜빡임 비율 유지
             focusScore: 0,
             timestamp,
           };
