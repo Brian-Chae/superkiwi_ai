@@ -2,8 +2,8 @@
  * 규칙 기반 AI 추천 엔진
  */
 
-import { FocusData } from '../../state/useFocusStore';
-import { ActivityData } from '../agent/activityMonitor';
+import type { FocusData } from '../../state/useFocusStore';
+import type { ActivityData } from '../agent/activityMonitor';
 import type { TimerSession } from '../../state/useTimerStore';
 
 export type RecommendationType =

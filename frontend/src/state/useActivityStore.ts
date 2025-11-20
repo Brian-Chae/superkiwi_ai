@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { activityMonitor, ActivityData } from '../lib/agent/activityMonitor';
+import { activityMonitor } from '../lib/agent/activityMonitor';
+import type { ActivityData } from '../lib/agent/activityMonitor';
 
 interface ActivityState {
   activityData: ActivityData | null;

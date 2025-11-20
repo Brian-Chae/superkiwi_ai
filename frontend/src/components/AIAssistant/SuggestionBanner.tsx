@@ -1,5 +1,5 @@
 import React from 'react';
-import { Recommendation } from '../../lib/ai/recommendationEngine';
+import type { Recommendation } from '../../lib/ai/recommendationEngine';
 
 interface SuggestionBannerProps {
   recommendations: Recommendation[];
