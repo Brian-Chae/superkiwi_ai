@@ -1,0 +1,14 @@
+{
+  "name": "superkiwi-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && yarn dev",
+    "dev:frontend": "cd frontend && yarn dev",
+    "dev:backend": "cd backend && uvicorn main:app --reload --port 8000",
+    "build": "cd frontend && yarn build",
+    "build:frontend": "cd frontend && yarn build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  }
+}
