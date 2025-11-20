@@ -6,7 +6,8 @@ import { SuggestionBanner } from '../components/AIAssistant/SuggestionBanner';
 import { useFocusStore } from '../state/useFocusStore';
 import { useActivityStore } from '../state/useActivityStore';
 import { useTimerStore } from '../state/useTimerStore';
-import { recommendationEngine, Recommendation } from '../lib/ai/recommendationEngine';
+import { recommendationEngine } from '../lib/ai/recommendationEngine';
+import type { Recommendation } from '../lib/ai/recommendationEngine';
 
 export const Home: React.FC = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
