@@ -1,0 +1,832 @@
+# Cursor AI Git Management Rules
+
+## Overview
+This document defines Git management rules specifically for Cursor AI-assisted development. These rules ensure consistent, high-quality version control when working with AI pair programming.
+
+---
+
+## Core Principles for AI-Assisted Git Operations
+
+### 1. Transparency & Explainability
+- AI must explain Git operations before execution
+- User confirmation required for destructive operations
+- Clear reasoning for branch and commit strategies
+
+### 2. Safety First
+- Never force push without explicit user permission
+- Always check current branch before operations
+- Verify no uncommitted changes before branch switches
+- Warn about potential conflicts
+
+### 3. Context Awareness
+- Understand project Git workflow (main/develop/feature)
+- Recognize branch naming conventions
+- Respect existing commit message patterns
+- Consider CI/CD implications
+
+---
+
+## Automated Git Operations
+
+### Branch Management
+
+#### Creating Branches
+**AI Workflow:**
+1. Analyze current branch and project structure
+2. Suggest appropriate branch type (feature/bugfix/hotfix)
+3. Propose branch name following convention
+4. Check if base branch is up-to-date
+5. Create branch after user confirmation
+
+**Example Interaction:**
+```
+User: "Create a branch for adding dark mode"
+AI: "I'll create a feature branch for dark mode.
+
+Proposed branch name: feature/SK-789-add-dark-mode
+
+Current branch: develop (up to date ✓)
+Base branch: develop
+Branch type: feature
+
+Commands to execute:
+  git checkout develop
+  git pull origin develop
+  git checkout -b feature/SK-789-add-dark-mode
+
+Proceed? (yes/no)"
+```
+
+#### Switching Branches
+**Safety Checks:**
+- Verify no uncommitted changes (offer to stash if needed)
+- Check if target branch exists
+- Warn about unmerged changes
+- Update branch if behind remote
+
+**Example:**
+```
+User: "Switch to develop"
+AI: "⚠️ You have uncommitted changes in 3 files:
+  - src/components/Timer.tsx
+  - src/styles/theme.css
+  - package.json
+
+Options:
+1. Commit changes now
+2. Stash changes
+3. Cancel operation
+
+What would you like to do?"
+```
+
+### Commit Operations
+
+#### Intelligent Commit Message Generation
+**AI Analysis Process:**
+1. Analyze file changes using `git diff`
+2. Identify change patterns (feat/fix/refactor/etc.)
+3. Determine affected scope/component
+4. Generate Conventional Commits format message
+5. Include relevant context and breaking changes
+
+**Message Template:**
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+
+🤖 Generated with Cursor AI
+```
+
+**Example:**
+```
+AI: "Analyzed changes in 5 files. Here's the proposed commit:
+
+feat(biometric): add eye-tracking focus detection
+
+Implement real-time focus score calculation using MediaPipe
+Face Mesh for landmark detection. Added new hooks for camera
+access and gaze estimation.
+
+Files changed:
+- src/lib/biometric/gazeEstimation.ts (new)
+- src/lib/biometric/faceDetection.ts (modified)
+- src/hooks/useFocusScore.ts (new)
+- src/types/biometric.ts (modified)
+- package.json (dependency: @mediapipe/face_mesh)
+
+Breaking changes: None
+Test coverage: 85%
+
+🤖 Generated with Cursor AI
+
+Would you like to:
+1. Use this message
+2. Edit the message
+3. Write manually"
+```
+
+#### Pre-Commit Validation
+**Automated Checks:**
+- Lint errors fixed
+- Type checking passed
+- Tests passing (if configured)
+- No debug code (console.log, debugger)
+- No sensitive data (API keys, tokens)
+- File size reasonable (< 1MB per file)
+
+**Validation Flow:**
+```
+User: "Commit these changes"
+AI: "Running pre-commit validation...
+
+✓ Lint check passed
+✓ Type check passed
+✓ No debug code found
+✓ No sensitive data detected
+⚠️ Tests not run (no test script configured)
+
+Proceed with commit? (yes/no)"
+```
+
+### Pull Request Assistance
+
+#### Automated PR Creation
+**AI Workflow:**
+1. Detect current feature branch
+2. Identify base branch (usually develop)
+3. Generate PR title from branch name
+4. Analyze all commits for PR description
+5. Identify related issues
+6. Suggest reviewers based on changed files
+7. Add appropriate labels
+
+**Example:**
+```
+User: "Create a PR for this feature"
+AI: "I'll help you create a pull request.
+
+📋 PR Summary:
+Title: feat(biometric): add eye-tracking focus detection
+Base: develop ← feature/SK-789-eye-tracking
+Commits: 8 commits, 12 files changed
+
+Generated PR Description:
+─────────────────────────────
+## Description
+Implements eye-tracking focus detection using MediaPipe Face Mesh.
+Real-time focus score calculation based on gaze direction and blink rate.
+
+## Type of Change
+- [x] New feature
+
+## Related Issues
+Closes #SK-789
+
+## Changes Made
+- Added gazeEstimation.ts for eye tracking
+- Integrated MediaPipe Face Mesh
+- Created useFocusScore hook
+- Updated biometric types
+- Added comprehensive tests
+
+## Testing
+- [x] Unit tests: 85% coverage
+- [x] Integration tests added
+- [x] Manual testing completed
+
+## Performance Impact
+- Bundle size: +45KB (MediaPipe dependency)
+- No performance regression detected
+─────────────────────────────
+
+Suggested reviewers:
+- @john-doe (modified biometric files)
+- @jane-smith (TypeScript expert)
+
+Labels: feature, biometric, needs-review
+
+Create PR? (yes/edit/no)"
+```
+
+---
+
+## Git Command Execution Rules
+
+### Safe Commands (Auto-Execute)
+- `git status`
+- `git log`
+- `git diff`
+- `git branch -l`
+- `git show`
+- `git blame`
+
+### Confirmation Required
+- `git commit`
+- `git push`
+- `git checkout`
+- `git merge`
+- `git rebase`
+- `git pull`
+- `git stash`
+
+### Explicit Permission Required
+- `git push --force`
+- `git reset --hard`
+- `git clean -fd`
+- `git rebase -i`
+- `git cherry-pick`
+- Operations on protected branches (main/develop)
+
+### Prohibited Without User Override
+- Force push to main/develop
+- Delete remote branches
+- Modify published history
+- Commit to protected branches directly
+
+---
+
+## AI-Assisted Conflict Resolution
+
+### Merge Conflict Workflow
+
+**Step 1: Detection**
+```
+AI: "🚨 Merge conflict detected in 3 files:
+  - src/components/Timer.tsx
+  - src/state/useTimerStore.ts
+  - package.json
+
+Would you like me to help resolve these conflicts?"
+```
+
+**Step 2: Analysis**
+```
+AI: "Analyzing conflicts...
+
+File: src/components/Timer.tsx
+Conflict type: Both modified same function
+Your changes: Updated timer display logic
+Incoming changes: Refactored timer state management
+
+Suggested resolution: Keep both changes, merge logic
+Confidence: High
+
+File: package.json
+Conflict type: Different dependency versions
+Your version: react@18.2.0
+Incoming version: react@18.3.0
+
+Suggested resolution: Use incoming (newer version)
+Confidence: High"
+```
+
+**Step 3: Resolution**
+```
+AI: "I can automatically resolve 2 of 3 conflicts.
+Manual review needed for: src/components/Timer.tsx
+
+Would you like me to:
+1. Auto-resolve safe conflicts, then show manual ones
+2. Show all conflicts for manual resolution
+3. Abort merge"
+```
+
+---
+
+## Intelligent Branch Suggestions
+
+### Feature Branch Naming
+**AI analyzes:**
+- Issue tracker integration (Jira, GitHub Issues)
+- Current task description
+- Project naming conventions
+- Existing branch patterns
+
+**Example:**
+```
+User: "I'm working on adding OAuth login"
+AI: "Based on your description, I suggest:
+
+feature/SK-234-oauth-authentication
+
+This follows your project convention:
+- Prefix: feature
+- Ticket: SK-234 (found in issue tracker)
+- Description: oauth-authentication (kebab-case)
+
+Alternative suggestions:
+- feature/auth-oauth2-login
+- feature/SK-234-google-oauth
+
+Which would you prefer?"
+```
+
+### Branch Cleanup Recommendations
+**AI monitors:**
+- Merged branches
+- Stale branches (no activity > 30 days)
+- Abandoned branches (no commits)
+
+**Example:**
+```
+AI: "🧹 Branch cleanup recommendation:
+
+Found 5 branches that can be safely deleted:
+1. feature/SK-123-old-feature (merged 45 days ago)
+2. bugfix/SK-456-timer-fix (merged 30 days ago)
+3. experiment/new-ui (no commits, 60 days old)
+
+Would you like me to:
+1. Delete all merged branches
+2. Review each branch individually
+3. Keep all branches"
+```
+
+---
+
+## Commit History Management
+
+### Interactive Rebase Assistant
+
+**Before Rebase:**
+```
+AI: "Your branch has 8 commits before merge to develop.
+Some commits are WIP/debugging commits.
+
+I recommend cleaning up the history:
+
+Current commits:
+1. feat: add focus detection
+2. wip: testing
+3. fix: typo
+4. wip: more testing
+5. feat: complete focus detection
+6. fix: lint errors
+7. refactor: cleanup
+8. docs: add comments
+
+Suggested rebase plan:
+- Squash commits 1,2,3,4,5 → "feat: implement focus detection"
+- Squash commits 6,7 → "refactor: code cleanup and lint fixes"
+- Keep commit 8 → "docs: add focus detection comments"
+
+Result: 3 clean commits
+
+Proceed with this rebase plan? (yes/edit/no)"
+```
+
+### Commit Amendment Suggestions
+
+**Smart Amendment Detection:**
+```
+AI: "I notice you just committed:
+  'feat: add dark mode support'
+
+But you have unstaged changes to:
+  - src/styles/darkMode.css (related to dark mode)
+
+Would you like to amend the previous commit to include this file?"
+```
+
+---
+
+## Integration with Project Workflow
+
+### CI/CD Awareness
+
+**Pre-Push Validation:**
+```
+AI: "Before pushing to remote, I'll run CI checks locally:
+
+Running checks...
+✓ Lint passed
+✓ Type check passed
+✓ Unit tests passed (142/142)
+✗ E2E tests failed (1/12)
+
+Failed test: Timer E2E - pause/resume
+Error: Expected timer to be paused, but it was running
+
+Would you like to:
+1. Fix the failing test before pushing
+2. Push anyway (not recommended)
+3. Create draft PR with failing test noted"
+```
+
+### Deployment Protection
+
+**Production Branch Safety:**
+```
+AI: "⚠️ WARNING: You're about to push to 'main' branch
+
+This branch is protected and triggers production deployment.
+
+Pre-deployment checklist:
+- [ ] All tests passing
+- [ ] Code reviewed and approved
+- [ ] Version bumped
+- [ ] CHANGELOG updated
+- [ ] Database migrations ready
+- [ ] Rollback plan prepared
+
+Are you sure you want to continue? (yes/no)"
+```
+
+---
+
+## Git Hooks Integration
+
+### Cursor-Managed Hooks
+
+#### Pre-Commit Hook
+```javascript
+// Cursor AI manages this hook
+// Location: .git/hooks/pre-commit
+
+// AI performs:
+// 1. Lint staged files
+// 2. Run type checking
+// 3. Check for sensitive data
+// 4. Validate commit message format
+// 5. Run quick tests if configured
+```
+
+#### Commit-Msg Hook
+```javascript
+// Validates commit message format
+// AI suggests corrections if format is wrong
+
+Example correction:
+AI: "Your commit message doesn't follow Conventional Commits:
+  'added dark mode'
+
+Suggested correction:
+  'feat(ui): add dark mode support'
+
+Would you like me to fix this? (yes/no)"
+```
+
+#### Pre-Push Hook
+```javascript
+// AI runs checks before push:
+// 1. Ensure branch is up to date
+// 2. Run full test suite
+// 3. Check for merge conflicts
+// 4. Verify no debug code
+```
+
+---
+
+## Context-Aware Git Operations
+
+### Smart Diff Analysis
+
+**Code Change Summary:**
+```
+User: "Show me what changed"
+AI: "Analyzing changes...
+
+📊 Change Summary:
+Files changed: 8
+Lines added: +234
+Lines removed: -89
+Net change: +145 lines
+
+By category:
+- Features: 3 files (Timer, Focus, Biometric)
+- Tests: 2 files
+- Types: 1 file
+- Docs: 2 files
+
+Key changes:
+1. Added focus detection algorithm (gazeEstimation.ts)
+2. Refactored timer state management (useTimerStore.ts)
+3. Added 45 new test cases
+4. Updated type definitions for biometric data
+
+Breaking changes: None
+Migration needed: No
+
+Would you like to see:
+1. Detailed diff
+2. File-by-file breakdown
+3. Visual diff (if supported)"
+```
+
+### Semantic Commit Grouping
+
+**Intelligent Commit Organization:**
+```
+AI: "Your 12 commits can be organized into:
+
+🎨 Features (5 commits)
+- feat(biometric): add eye tracking
+- feat(ui): add dark mode
+- feat(timer): add pause/resume
+
+🐛 Bug Fixes (3 commits)
+- fix(timer): resolve state issue
+- fix(ui): correct layout bug
+- fix(api): handle null response
+
+♻️ Refactoring (2 commits)
+- refactor(state): simplify store logic
+- refactor(utils): extract helpers
+
+📝 Documentation (2 commits)
+- docs: update README
+- docs: add API documentation
+
+Would you like me to create a PR summary using these groups?"
+```
+
+---
+
+## Best Practices for Cursor AI Git Usage
+
+### DO ✅
+1. **Let AI analyze before acting**
+   - Review AI suggestions before confirming
+   - Understand the reasoning behind recommendations
+
+2. **Use AI for repetitive tasks**
+   - Commit message generation
+   - PR description creation
+   - Branch naming
+   - Conflict resolution assistance
+
+3. **Leverage AI context**
+   - AI knows your project structure
+   - AI understands your Git workflow
+   - AI can suggest based on history
+
+4. **Ask for explanations**
+   - "Why did you suggest this branch name?"
+   - "Explain this merge conflict"
+   - "What's the impact of this change?"
+
+5. **Use AI for learning**
+   - Ask about Git commands
+   - Request best practices
+   - Learn from AI's reasoning
+
+### DON'T ❌
+1. **Blindly accept AI suggestions**
+   - Always review generated commit messages
+   - Verify branch names make sense
+   - Check PR descriptions are accurate
+
+2. **Let AI force push without understanding**
+   - Understand why force push is needed
+   - Verify you're not overwriting others' work
+   - Use `--force-with-lease` when possible
+
+3. **Skip manual review of conflicts**
+   - AI can suggest, but verify logic
+   - Don't auto-resolve complex conflicts
+   - Test after conflict resolution
+
+4. **Ignore AI warnings**
+   - Warnings about protected branches
+   - Alerts about sensitive data
+   - Conflict detection notices
+
+5. **Over-rely on automation**
+   - Understand Git fundamentals
+   - Know how to work without AI
+   - Don't let AI become a crutch
+
+---
+
+## Cursor Command Patterns
+
+### Git Command Syntax for Cursor
+
+#### Natural Language Commands
+```
+"Create a feature branch for user authentication"
+"Commit these changes with a proper message"
+"Show me what changed in the last 3 commits"
+"Create a PR for this feature"
+"Help me resolve merge conflicts"
+"Clean up my commit history"
+"Push to remote after running tests"
+```
+
+#### Explicit Git Commands
+```
+"Run: git status"
+"Execute: git log --oneline --graph"
+"Show: git diff develop...HEAD"
+```
+
+#### Compound Operations
+```
+"Pull latest develop, create feature branch, and switch to it"
+"Commit all changes, push, and create PR"
+"Stash changes, switch branch, then pop stash"
+```
+
+---
+
+## Error Handling & Recovery
+
+### Common Git Errors
+
+#### Detached HEAD
+```
+AI: "⚠️ You're in 'detached HEAD' state
+
+This means you're not on any branch. To recover:
+
+Option 1: Create new branch from here
+  git checkout -b feature/SK-999-recovery
+
+Option 2: Return to previous branch
+  git checkout develop
+
+Option 3: Discard changes and return
+  git checkout develop (changes will be lost)
+
+What would you like to do?"
+```
+
+#### Failed Push
+```
+AI: "Push failed: Remote contains commits you don't have
+
+Options to resolve:
+1. Pull and merge (recommended)
+   git pull origin feature/SK-123
+
+2. Pull and rebase (cleaner history)
+   git pull --rebase origin feature/SK-123
+
+3. Force push (⚠️ dangerous, will overwrite remote)
+   git push --force-with-lease
+
+Which option would you prefer?"
+```
+
+#### Large File Error
+```
+AI: "🚨 Push rejected: File too large
+
+Large files detected:
+- video/demo.mp4 (150MB)
+- dataset/training.csv (80MB)
+
+These files should not be in Git. Would you like me to:
+1. Remove files and add to .gitignore
+2. Set up Git LFS for large files
+3. Cancel push and handle manually
+
+Note: I'll help you remove these from history if needed."
+```
+
+---
+
+## AI Learning & Adaptation
+
+### Project-Specific Learning
+
+**Cursor AI learns your project's:**
+- Commit message style
+- Branch naming patterns
+- Review process
+- CI/CD requirements
+- Team conventions
+
+**Example Adaptation:**
+```
+After observing 10 commits, AI adapts:
+
+Initial suggestion:
+"feat(component): add new feature"
+
+Adapted to your style:
+"[FEATURE] Component - Add new feature
+
+Ticket: SK-123
+Reviewed-by: Team Lead"
+```
+
+### Team Workflow Recognition
+
+**AI identifies patterns like:**
+- Always create PR to develop (not main)
+- Squash commits before merge
+- Include ticket number in commit
+- Tag specific reviewers by file area
+- Run specific tests before push
+
+---
+
+## Integration with External Tools
+
+### Issue Tracker Integration
+```
+AI: "I detected you're working on SK-234.
+
+Would you like me to:
+1. Update issue status to 'In Progress'
+2. Add commit reference to issue
+3. Close issue when PR is merged
+4. Link all commits to this issue"
+```
+
+### CI/CD Platform Integration
+```
+AI: "Your CI pipeline includes:
+- Unit tests (required)
+- E2E tests (required)
+- Security scan (optional)
+- Performance tests (optional)
+
+I'll ensure all required checks pass before allowing push."
+```
+
+---
+
+## Troubleshooting Guide
+
+### When AI Suggestions Seem Wrong
+
+1. **Ask for explanation**
+   ```
+   User: "Why did you suggest squashing these commits?"
+   AI: "I suggested squashing because..."
+   ```
+
+2. **Request alternatives**
+   ```
+   User: "Show me other options"
+   AI: "Alternative approaches: ..."
+   ```
+
+3. **Provide feedback**
+   ```
+   User: "That's not correct for our workflow"
+   AI: "I'll adjust. Can you describe your preferred workflow?"
+   ```
+
+### When AI Can't Help
+
+**Escalate to manual Git when:**
+- Complex three-way merges
+- Repository corruption
+- Submodule issues
+- Git LFS problems
+- Custom Git workflows
+
+---
+
+## Summary: Cursor AI Git Workflow
+
+```
+┌─────────────────────────────────────────┐
+│  User Intent                            │
+│  "I want to add a new feature"          │
+└─────────────┬───────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────┐
+│  AI Analysis                            │
+│  - Current state                        │
+│  - Project conventions                  │
+│  - Safety checks                        │
+└─────────────┬───────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────┐
+│  AI Suggestion                          │
+│  - Proposed commands                    │
+│  - Reasoning                            │
+│  - Alternatives                         │
+└─────────────┬───────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────┐
+│  User Confirmation                      │
+│  - Review suggestion                    │
+│  - Approve/Edit/Reject                  │
+└─────────────┬───────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────┐
+│  Execution                              │
+│  - Run commands                         │
+│  - Validate results                     │
+│  - Report outcome                       │
+└─────────────────────────────────────────┘
+```
+
+---
+
+**Version**: 1.0.0
+**Last Updated**: 2025-11-20
+**Compatible with**: Cursor AI Editor v0.40+
