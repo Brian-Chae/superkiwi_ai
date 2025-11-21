@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { DrawingUtils, FaceLandmarker } from '@mediapipe/tasks-vision';
+import type { Landmark } from '../../types/biometric';
 
 interface FaceLandmarkCanvasProps {
   video: HTMLVideoElement | null;
-  landmarks: any[] | null;
+  landmarks: Landmark[] | null;
   width: number;
   height: number;
   showConnectors?: boolean;

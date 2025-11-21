@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
+import type { Landmark, FaceDetectionResult, BlendShapes } from '../../types/biometric';
 
 let faceLandmarker: FaceLandmarker | null = null;
 let initializationPromise: Promise<FaceLandmarker> | null = null;
@@ -106,17 +107,13 @@ export async function initializeFaceLandmarker(): Promise<FaceLandmarker> {
 export async function detectFace(
   video: HTMLVideoElement,
   timestamp: number
-): Promise<{
-  landmarks: any[] | null;
-  detected: boolean;
-  blendshapes?: any;
-}> {
+): Promise<FaceDetectionResult> {
   if (!faceLandmarker) {
     await initializeFaceLandmarker();
   }
 
   if (!faceLandmarker) {
-    return { landmarks: null, detected: false };
+    return { landmarks: null, detected: false, confidence: 0 };
   }
 
   // 비디오가 준비되었는지 확인
@@ -126,7 +123,7 @@ export async function detectFace(
     video.videoWidth === 0 ||
     video.videoHeight === 0
   ) {
-    return { landmarks: null, detected: false };
+    return { landmarks: null, detected: false, confidence: 0 };
   }
 
   try {
@@ -163,14 +160,31 @@ export async function detectFace(
     }
     
     if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+      const landmarks: Landmark[] = results.faceLandmarks[0].map((lm: any) => ({
+        x: lm.x,
+        y: lm.y,
+        z: lm.z,
+      }));
+      
+      const blendshapes: BlendShapes | null = results.faceBlendshapes && results.faceBlendshapes[0]
+        ? {
+            categories: results.faceBlendshapes[0].categories.map((cat: any) => ({
+              categoryName: cat.categoryName || '',
+              displayName: cat.displayName,
+              score: cat.score || 0,
+            })),
+          }
+        : null;
+
       return {
-        landmarks: results.faceLandmarks[0],
+        landmarks,
         detected: true,
-        blendshapes: results.faceBlendshapes ? results.faceBlendshapes[0] : null,
+        blendshapes,
+        confidence: 0.95,
       };
     }
 
-    return { landmarks: null, detected: false, blendshapes: null };
+    return { landmarks: null, detected: false, blendshapes: null, confidence: 0 };
   } catch (error) {
     // 콘솔 복원
     const isDevelopment = import.meta.env.DEV;
@@ -184,7 +198,7 @@ export async function detectFace(
     if (!errorMessage.includes('ROI width and height must be > 0')) {
       console.error('❌ Face detection error:', error);
     }
-    return { landmarks: null, detected: false };
+    return { landmarks: null, detected: false, confidence: 0 };
   }
 }
 
@@ -196,7 +210,7 @@ export async function detectFace(
  * - 왼쪽 눈 (시점에서 오른쪽): 33(왼쪽), 7(위), 163(위), 144(오른쪽), 145(아래), 153(아래)
  * - 오른쪽 눈 (시점에서 왼쪽): 263(왼쪽), 249(위), 390(위), 373(오른쪽), 374(아래), 380(아래)
  */
-export function extractEyeLandmarks(landmarks: any[]): {
+export function extractEyeLandmarks(landmarks: Landmark[]): {
   leftEye: { x: number; y: number }[];
   rightEye: { x: number; y: number }[];
 } {

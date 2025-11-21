@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { CameraView } from './CameraView';
 import { detectFace, extractEyeLandmarks } from '../../lib/biometric/faceDetection';
-import { calculateEAR, detectBlink, BlinkRateCalculator } from '../../lib/biometric/blinkEstimation';
+import { calculateEAR, BlinkRateCalculator } from '../../lib/biometric/blinkEstimation';
 import {
   calculateGazeCenter,
   calculateGazeVector,
